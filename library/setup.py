@@ -31,6 +31,6 @@ if parse_version(__version__) < minimum_version:
     raise RuntimeError("Package setuptools must be at least version {}".format(minimum_version))
 
 setup(
-    packages=['{{LIBNAME}}'],
+    packages=['sgp30'],
     install_requires=['setuptools>={}'.format(minimum_version)]
 )
