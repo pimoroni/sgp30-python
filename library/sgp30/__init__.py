@@ -7,6 +7,20 @@ __version__ = '0.0.1'
 SGP30_I2C_ADDR = 0x58
 
 
+class SGP30Reading:
+    __slots__ = 'equivalent_co2', 'total_voc'
+
+    def __init__(self, eco2, tvoc):
+        self.equivalent_co2 = eco2
+        self.total_voc = tvoc
+
+    def __str__(self):
+        return """Air Quality:
+Equivalent C02: {: 5d} (ppm)
+Total VOC:      {: 5d} (ppb)
+""".format(self.equivalent_co2, self.total_voc)
+
+
 class SGP30:
     def __init__(self, i2c_dev=None, i2c_msg=None, i2c_addr=SGP30_I2C_ADDR):
         """Mapping table of SGP30 commands.
@@ -79,14 +93,14 @@ class SGP30:
 
     def calculate_crc(self, data):
         """Calculate an 8-bit CRC from a 16-bit word
-        
+
         Defined in section 6.6 of the SGP30 datasheet.
-        
+
         Polynominal: 0x31 (x8 + x5 + x4 + x1)
         Initialization: 0xFF
         Reflect input/output: False
         Final XOR: 0x00
-        
+
         """
         crc = 0xff  # Initialization value
         # calculates 8-Bit checksum with given polynomial
@@ -100,3 +114,49 @@ class SGP30:
                 else:
                     crc <<= 1
         return crc & 0xff
+
+    def get_unique_id(self):
+        result = self.command('get_serial_id')
+        return result[0] << 32 | result[1] << 16 | result[0]
+
+    def start_measurement(self, run_while_waiting=None):
+        """Start air quality measurement on the SGP30.
+
+        The first 15 readings are discarded so this command will block for 15s.
+
+        :param run_while_waiting: Function to call for every discarded reading.
+
+        """
+        self.command('init_air_quality')
+        while True:
+            # Discard the initialisation readings as per page 8/15 of the datasheet
+            eco2, tvoc = self.command('measure_air_quality')
+            # The first 15 readings should return as 400, 0 so abort when they change
+            if eco2 != 400 or tvoc != 0:
+                break
+            if callable(run_while_waiting):
+                run_while_waiting()
+            time.sleep(1.0)
+
+    def get_air_quality(self):
+        """Get an air quality measurement.
+
+        Returns an instance of SGP30Reading with the properties equivalent_co2 and total_voc.
+
+        This should be called at 1s intervals to ensure the dynamic baseline compensation on the SGP30 operates correctly.
+
+        """
+        eco2, tvoc = self.command('measure_air_quality')
+        return SGP30Reading(eco2, tvoc)
+
+    def get_baseline(self):
+        """Get the current baseline setting.
+
+        Returns an instance of SGP30Reading with the properties equivalent_co2 and total_voc.
+
+        """
+        eco2, tvoc = self.command('get_baseline')
+        return SGP30Reading(eco2, tvoc)
+
+    def set_baseline(self, eco2, tvoc):
+        self.command('set_baseline', eco2, tvoc)
