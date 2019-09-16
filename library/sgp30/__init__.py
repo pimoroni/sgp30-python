@@ -81,9 +81,11 @@ class SGP30:
             msg_r = self._i2c_msg.read(self._i2c_addr, response_len * 3)
             self._i2c_dev.i2c_rdwr(msg_r)
 
+            buf = msg_r.buf[0:response_len * 3]
+
             response = struct.unpack(
                 '>' + ('HB' * response_len),
-                msg_r.buf)
+                buf)
 
             verified = []
             for i in range(response_len):
