@@ -1,22 +1,19 @@
-_test_data = {
-    'init_air_quality': [0x03, 0x20],
-    'measure_air_quality': [0x08, 0x20],
-    'get_baseline': [0x15, 0x20],
-    'set_baseline': [0x1e, 0x20, 0xFE, 0xCA, 0x68, 0xFE, 0xCA, 0x68],
-    'set_humidity': [0x61, 0x20, 0xFE, 0xCA, 0x68],
-    'measure_test': [0x32, 0x20],
-    'get_feature_set_version': [0x2f, 0x20],
-    'measure_raw_signals': [0x50, 0x20],
-    'get_serial_id': [0x82, 0x36]
-}
+from tools import MockI2CDev, MockI2CMsg
 
 
-def test_commands():
-    import sgp30
-    sgp30 = sgp30.SGP30()
+def test_setup():
+    from sgp30 import SGP30
+    sgp30 = SGP30(i2c_dev=MockI2CDev(), i2c_msg=MockI2CMsg())
+    del sgp30
 
-    for command_name in sgp30.commands.keys():
-        cmd, param_len, response_len = sgp30.commands[command_name]
-        args = [0xCAFE] * param_len
-        result = sgp30.command(command_name, args)
-        assert _test_data[command_name] == [ord(n) for n in result]
+
+def test_get_unique_id():
+    from sgp30 import SGP30
+    sgp30 = SGP30(i2c_dev=MockI2CDev(), i2c_msg=MockI2CMsg())
+    assert sgp30.get_unique_id() == 0xffffffffffff
+
+
+def test_get_feature_set_version():
+    from sgp30 import SGP30
+    sgp30 = SGP30(i2c_dev=MockI2CDev(), i2c_msg=MockI2CMsg())
+    assert sgp30.get_feature_set_version() == (0xc, 0xfe)

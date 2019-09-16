@@ -80,14 +80,19 @@ class SGP30:
             # Each parameter is a word (2 bytes) followed by a CRC (1 byte)
             msg_r = self._i2c_msg.read(self._i2c_addr, response_len * 3)
             self._i2c_dev.i2c_rdwr(msg_r)
-            response = struct.unpack('>' + ('HB' * response_len), msg_r.buf[0:response_len * 3])
+
+            response = struct.unpack(
+                '>' + ('HB' * response_len),
+                msg_r.buf)
 
             verified = []
             for i in range(response_len):
                 offset = i * 2
                 value, crc = response[offset:offset + 2]
                 if crc != self.calculate_crc(value):
-                    raise RuntimeError("Invalid CRC in response from SGP30")
+                    raise RuntimeError("Invalid CRC in response from SGP30: {:02x} != {:02x}",
+                                       crc,
+                                       self.calculate_crc(value))
                 verified.append(value)
             return verified
 
@@ -104,9 +109,7 @@ class SGP30:
         """
         crc = 0xff  # Initialization value
         # calculates 8-Bit checksum with given polynomial
-        for byte in struct.pack('>H', data):
-            if type(byte) == str:
-                byte = ord(byte)
+        for byte in [(data & 0xff00) >> 8, data & 0x00ff]:
             crc ^= byte
             for _ in range(8):
                 if crc & 0x80:
@@ -118,6 +121,10 @@ class SGP30:
     def get_unique_id(self):
         result = self.command('get_serial_id')
         return result[0] << 32 | result[1] << 16 | result[0]
+
+    def get_feature_set_version(self):
+        result = self.command('get_feature_set_version')[0]
+        return (result & 0xf000) >> 12, result & 0x00ff
 
     def start_measurement(self, run_while_waiting=None):
         """Start air quality measurement on the SGP30.
