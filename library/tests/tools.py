@@ -25,7 +25,7 @@ class MockI2CMsg():
 class MockI2CMsgR():
     def __init__(self, i2c_addr, response_len):
         self._num_words = response_len // 3
-        self.buf = ""
+        self.buf = None
 
     def process(self, last_command):
         result = [0, 0, 0]
@@ -34,14 +34,17 @@ class MockI2CMsgR():
         if last_command[0] == 0x202f:  # get_feature_set_version
             result = [0xCAFE, 0x0000, 0x0000]
 
+        buf = []
+
         for i in range(self._num_words):
             word = result[i]
-            packed = str(struct.pack('>H', word))
-            self.buf += packed[0]
-            self.buf += packed[1]
-            self.buf += chr(self.calculate_crc(word))
+            packed = bytearray(struct.pack('>H', word))
+            buf.append(packed[0])
+            buf.append(packed[1])
+            buf.append(self.calculate_crc(word))
 
-        self.buf = bytearray([ord(x) for x in self.buf])
+        self.buf = bytearray(buf)
+
 
     def calculate_crc(self, data):
         """Calculate an 8-bit CRC from a 16-bit word

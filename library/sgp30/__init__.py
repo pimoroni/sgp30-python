@@ -94,7 +94,8 @@ class SGP30:
                 if crc != self.calculate_crc(value):
                     raise RuntimeError("Invalid CRC in response from SGP30: {:02x} != {:02x}",
                                        crc,
-                                       self.calculate_crc(value))
+                                       self.calculate_crc(value),
+                                       buf)
                 verified.append(value)
             return verified
 
