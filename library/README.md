@@ -17,3 +17,9 @@ Latest/development library from GitHub:
 * `cd sgp30-python`
 * `sudo ./install.sh`
 
+
+# Changelog
+0.0.1
+-----
+
+* Initial Release
