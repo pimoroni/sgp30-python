@@ -138,15 +138,18 @@ class SGP30:
 
         """
         self.command('init_air_quality')
+        testsamples = 0
         while True:
             # Discard the initialisation readings as per page 8/15 of the datasheet
             eco2, tvoc = self.command('measure_air_quality')
             # The first 15 readings should return as 400, 0 so abort when they change
-            if eco2 != 400 or tvoc != 0:
+            # Break after 20 test samples to avoid a potential infinite loop
+            if eco2 != 400 or tvoc != 0 or testsamples >= 20:
                 break
             if callable(run_while_waiting):
                 run_while_waiting()
             time.sleep(1.0)
+            testsamples += 1
 
     def get_air_quality(self):
         """Get an air quality measurement.
