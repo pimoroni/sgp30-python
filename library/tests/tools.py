@@ -3,6 +3,7 @@ import struct
 
 class MockI2CDev():
     def __init__(self):
+        self._open = True
         self._last_write = None
 
     def i2c_rdwr(self, a, b=None):
@@ -12,6 +13,9 @@ class MockI2CDev():
             a.process(self._last_write)
         if b is not None:
             b.process(self._last_write)
+
+    def close(self):
+        self._open = False
 
 
 class MockI2CMsg():
@@ -44,7 +48,6 @@ class MockI2CMsgR():
             buf.append(self.calculate_crc(word))
 
         self.buf = bytearray(buf)
-
 
     def calculate_crc(self, data):
         """Calculate an 8-bit CRC from a 16-bit word
