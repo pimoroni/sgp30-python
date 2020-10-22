@@ -172,4 +172,4 @@ class SGP30:
         return SGP30Reading(eco2, tvoc)
 
     def set_baseline(self, eco2, tvoc):
-        self.command('set_baseline', tvoc, eco2)
+        self.command('set_baseline', [tvoc, eco2])
