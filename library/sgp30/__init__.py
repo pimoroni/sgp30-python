@@ -173,3 +173,6 @@ class SGP30:
 
     def set_baseline(self, eco2, tvoc):
         self.command('set_baseline', [tvoc, eco2])
+
+    def __del__(self):
+        self._i2c_dev.close()
