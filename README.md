@@ -9,11 +9,11 @@
 
 Stable library from PyPi:
 
-* Just run `sudo pip install pimoroni-sgp30`
+* Just run `python3 -m pip install pimoroni-sgp30`
 
 Latest/development library from GitHub:
 
 * `git clone https://github.com/pimoroni/sgp30-python`
 * `cd sgp30-python`
-* `sudo ./install.sh`
+* `sudo ./install.sh --unstable`
 
