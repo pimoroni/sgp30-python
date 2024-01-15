@@ -1,6 +1,7 @@
-from sgp30 import SGP30
-import time
 import sys
+import time
+
+from sgp30 import SGP30
 
 sgp30 = SGP30()
 
