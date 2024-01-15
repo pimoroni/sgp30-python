@@ -1,7 +1,6 @@
 import struct
 import time
 
-
 __version__ = '0.0.2'
 
 SGP30_I2C_ADDR = 0x58
