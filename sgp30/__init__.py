@@ -174,7 +174,7 @@ class SGP30:
         self.command('set_baseline', [tvoc, eco2])
 
     def set_humidity(self, humidity):
-        """Set the absolute humidity on the SGP30 for more acurate readings of air quality signals (TVOC & eCO2)
+        """Set the absolute humidity on the SGP30 for more accurate readings of air quality signals (TVOC & eCO2)
 
         :param humidity: absolute humidity value as integer or float
 
